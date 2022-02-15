@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+__pycache__/*.py[cod]
 
 # C extensions
 *.so
@@ -19,3 +20,4 @@ __pycache__/
 
 # Built Visual Studio Code Extensions
 *.vsix
+
