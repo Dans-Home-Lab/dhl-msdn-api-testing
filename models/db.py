@@ -18,3 +18,4 @@ def read_database(client, id):
     except exceptions.CosmosResourceNotFoundError:
         print('A database with id \'{0}\' does not exist'.format(id))
         #from https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/database_management.py
+        #Also see: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/document_management.py#L41-L49
