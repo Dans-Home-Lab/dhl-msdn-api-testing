@@ -1,14 +1,16 @@
 from pydantic import BaseModel
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
-from .. import config
+import config.config as config
 
 HOST = config.settings['host']
 MASTER_KEY = config.settings['master_key']
 DATABASE_ID = config.settings['database_id']
 
+client = cosmos_client(HOST,MASTER_KEY)
+
 def read_database(client, id):
-    print("\n3. Get a Database by id")
+    print("Get a Database by id")
 
     try:
         database = client.get_database_client(id)
