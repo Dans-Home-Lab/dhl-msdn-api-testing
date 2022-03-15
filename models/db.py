@@ -7,13 +7,13 @@ HOST = config.settings['host']
 MASTER_KEY = config.settings['master_key']
 DATABASE_ID = config.settings['database_id']
 
-client = cosmos_client(HOST,MASTER_KEY)
+dbclient = cosmos_client(HOST,MASTER_KEY)
 
-def read_database(client, id):
+def read_database(dbclient, id):
     print("Get a Database by id")
 
     try:
-        database = client.get_database_client(id)
+        database = dbclient.get_database_client(id)
         database.read()
         print('Database with id \'{0}\' was found, it\'s link is {1}'.format(id, database.database_link))
 
