@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Response
+from asyncio.windows_events import NULL
+from urllib import response
+from fastapi import FastAPI, Response, HTTPException
 from pydantic import BaseModel
 from models import db as DB
 
@@ -25,6 +27,10 @@ async def root():
 
     
 
-@app.get("/vpc/{id}")
+@app.get("/db/{id}")
 async def vpc_id(id):
-    DB.read_database
+    db_result = await DB.get_database(id)
+    if (db_result == NULL):
+        raise HTTPException(status_code=404, detail="Item not found")
+    return db_result
+
