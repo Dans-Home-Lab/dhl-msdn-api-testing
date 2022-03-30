@@ -21,3 +21,5 @@ __pycache__/*.py[cod]
 # Built Visual Studio Code Extensions
 *.vsix
 
+# Models byte-compiled
+models/*.py[cod]
