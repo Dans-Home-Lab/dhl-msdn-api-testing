@@ -25,7 +25,7 @@ async def theme():
         file.close
         return theme_css
 
-@app.get("/db")
+@app.get("/dbs")
 async def get_all_databases():
     databases = await DB.get_all_databases()
     return databases
@@ -41,4 +41,9 @@ async def get_database(id):
 @app.post("/db/{id}")
 async def create_database(id):
     db_result = await DB.create_database(id)
+    return db_result
+
+@app.post("/db/{db}/container/{id}")
+async def creat_container(id):
+    db_result = await DB.create_container(id)
     return db_result

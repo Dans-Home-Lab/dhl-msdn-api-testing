@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
+import azure.cosmos.partition_key as PartitionKey
 import config.config as config
 
 HOST = config.settings['host']
@@ -28,7 +29,9 @@ async def get_database_path(id):
         database = dbclient.get_database_client(id)
         database.read()
         print('Database with id \'{0}\' was found, it\'s link is {1}'.format(id, database.database_link))
+        #print(database)
         return database.database_link
+        
 
     except exceptions.CosmosResourceNotFoundError:
         print('A database with id \'{0}\' does not exist'.format(id))
@@ -41,9 +44,35 @@ async def create_database(id):
     try:
         dbclient.create_database(id=id)
         print('Database with id \'{0}\' created'.format(id))
-        new_db_path = get_database_path(id)
-        return new_db_path
+        database_url = '/db/{0}'.format(id)
+        return database_url
+
     except exceptions.CosmosResourceExistsError:
         print('Database with id \'{0}\' already exists'.format(id))
         existing_db_path = get_database_path(id)
         return HTTPException(status_code=309, detail="Location: {0}".format(existing_db_path))
+
+async def create_container(db,id):
+    partition_key = PartitionKey(path='/id', kind='Hash')
+    print('Creating container: {0} with id: {1}'.format(db,id))
+
+    try:
+        db.create_container(id=id, partition_key=partition_key)
+        print('Container with id \'{0}\' created'.format(id))
+
+    except exceptions.CosmosResourceExistsError:
+        print('A container with id \'{0}\' already exists'.format(id))
+
+    except exceptions.CosmosResourceNotFoundError:
+        print('A database with name \'{0}\' was not found'.format(db))
+
+    return get_database_path(id)
+
+def list_Containers(db):
+    print('Containers:')
+    containers = list(db.list_containers())
+
+    for container in containers:
+        print(container['id'])
+    
+    return containers
