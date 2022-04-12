@@ -44,6 +44,16 @@ async def create_database(id):
     return db_result
 
 @app.post("/db/{db}/container/{id}")
-async def creat_container(id):
-    db_result = await DB.create_container(id)
+async def create_container(db,id):
+    db_result = await DB.create_container(db,id)
     return db_result
+
+@app.get("/db/{db}/containers")
+async def get_containers(db):
+    containers = await DB.list_containers(db)
+    return containers
+
+@app.get("/db/{db}/container/{id}")
+async def get_container(db,id):
+    c_data = await DB.get_container(db,id)
+    return c_data
