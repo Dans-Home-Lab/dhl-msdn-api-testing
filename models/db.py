@@ -100,12 +100,12 @@ async def list_containers(db):
 
 #GET: /db/{db}/container/{id}
 async def get_container(db,id):
-    print('Getting container \'{0}\' in database \'{1}\'.'.format(id,db))
+    print('Trying container \'{0}\' in database \'{1}\'.'.format(id,db))
     try:
         container_client = dbclient.get_database_client(db)
         container = container_client.get_container_client(id)
-        container_data = container.read
-        print('Data: {0}'.format(container_data))
-        return container_data
+        container.read
+        return container._get_properties()
+
     except exceptions.CosmosResourceNotFoundError:
         return HTTPException(status_code=404, detail='No container \'{0}\' found in database \'{1}\''.format(id,db))
