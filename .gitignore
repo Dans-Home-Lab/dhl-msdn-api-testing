@@ -25,3 +25,4 @@ __pycache__/*.py[cod]
 models/*.py[cod]
 models/__pycache__/*.py[cod]
 __pycache__/main.cpython-310.pyc
+
