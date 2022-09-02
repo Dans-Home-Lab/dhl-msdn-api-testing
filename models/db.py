@@ -53,7 +53,7 @@ async def get_database(id):
 async def create_database(id):
     print('creating database by name: {0}'.format(id))
     try:
-        dbclient.create_database_if(id=id)
+        dbclient.create_database_if_not_exists(id)
         print('Database with id \'{0}\' created'.format(id))
         database_url = '/db/{0}'.format(id)
         return database_url
@@ -109,3 +109,9 @@ async def get_container(db,id):
 
     except exceptions.CosmosResourceNotFoundError:
         return HTTPException(status_code=404, detail='No container \'{0}\' found in database \'{1}\''.format(id,db))
+
+async def get_item_by_id(container, id):
+    print('Getting item by id \'{0}\''.format(id))
+    #https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/document_management.py#L46-L54
+    #or https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/document_management.py#L71-L83
+    response = container.read_item(item=id, partition_key=id)
