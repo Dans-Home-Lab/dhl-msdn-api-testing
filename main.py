@@ -11,10 +11,10 @@ app = FastAPI()
 async def root():
     try:
         file = open("./static/index.html")
-        r = Response(content=file.read(), media_type="text/html")
+        indexfile = Response(content=file.read(), media_type="text/html")
     finally:
         file.close
-        return r
+        return indexfile
 
 @app.get("/static/theme.css")
 async def theme():
@@ -24,6 +24,7 @@ async def theme():
     finally:
         file.close
         return theme_css
+#End Static Region
 
 @app.get("/dbs")
 async def get_all_databases():
@@ -35,7 +36,7 @@ async def get_all_databases():
 async def get_database(id):
     db_result = await DB.get_database_path(id)
     if (db_result == NULL):
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Database {0} not found".format(id))
     return db_result
 
 @app.post("/db/{id}")
