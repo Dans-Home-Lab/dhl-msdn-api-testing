@@ -25,4 +25,3 @@ __pycache__/*.py[cod]
 # Models byte-compiled
 models/*.py[cod]
 models/__pycache__/*.py[cod]
-__pycache__/main.cpython-310.pyc
