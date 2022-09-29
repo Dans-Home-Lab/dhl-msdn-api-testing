@@ -1,5 +1,8 @@
 {
     "python.analysis.extraPaths": [
         "${LOCALAPPDATA}\\programs\\python\\python310\\lib\\site-packages"
-    ]
+    ],
+    "files.exclude": {
+        "**/__pycache__": true
+    }
 }

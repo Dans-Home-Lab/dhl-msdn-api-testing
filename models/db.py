@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
-import azure.cosmos.partition_key as PartitionKey
+from azure.cosmos.partition_key import PartitionKey
 import config.config as config
 
 HOST = config.settings['host']
@@ -31,13 +31,13 @@ async def get_database_path(id):
         database = dbclient.get_database_client(id)
         database.read()
         print('Database with id \'{0}\' was found, it\'s link is {1}'.format(id, database.database_link))
-        #print(database)
+        #this returns the wrong link. dbs/test instead of db/test (singular vs plural)
         return database.database_link
         
 
     except exceptions.CosmosResourceNotFoundError:
         print('A database with id \'{0}\' does not exist'.format(id))
-        return NULL
+        return  HTTPException(status_code=404, detail=f"No database {id} found")
         #from https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/database_management.py
         #Also see: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/document_management.py#L41-L49
 
@@ -66,21 +66,22 @@ async def create_database(id):
 #POST: /db/{db}/container/{id}
 async def create_container(db,id):
     partition_key = PartitionKey(path='/id', kind='Hash')
-    print('Creating container: {0} with id: {1}'.format(db,id))
+    print('Creating container in database: {0} with id: {1}'.format(db,id))
 
     try:
-        db.create_container(id=id, partition_key=partition_key)
+        database = dbclient.get_database_client(db)
+        database.create_container(id=id, partition_key=partition_key)
         print('Container with id \'{0}\' created'.format(id))
 
     except exceptions.CosmosResourceExistsError:
         print('A container with id \'{0}\' already exists'.format(id))
-        #Return 409
+        return HTTPException(status_code=409, detail=f"Container {id} already exists in database {db}")
 
     except exceptions.CosmosResourceNotFoundError:
         print('A database with name \'{0}\' was not found'.format(db))
-        #Return 404
+        return HTTPException(status_code=404, detail=f"No database {db} found")
 
-    return get_database_path(id)
+    return (f'/db/{db}/container/{id}')
 
 #GET: /db/{db}/containers
 async def list_containers(db):
