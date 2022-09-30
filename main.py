@@ -8,6 +8,7 @@ from models import db as DB
 app = FastAPI()
 
 #Some static elements first. Not really part of the API but this is also where we can store the openapi spec.
+#To Do: Use 'from fastapi.staticfiles import StaticFiles; ... app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get("/")
 async def root():
     try:

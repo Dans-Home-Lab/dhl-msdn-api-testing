@@ -74,12 +74,12 @@ async def create_container(db,id):
         print('Container with id \'{0}\' created'.format(id))
 
     except exceptions.CosmosResourceExistsError:
-        print('A container with id \'{0}\' already exists'.format(id))
-        return HTTPException(status_code=409, detail=f"Container {id} already exists in database {db}")
+        print('A container with id \'{0}\' already exists in database \'{1}\''.format(id,db))
+        raise HTTPException(status_code=409, detail=f"Container {id} already exists in database {db}")
 
     except exceptions.CosmosResourceNotFoundError:
         print('A database with name \'{0}\' was not found'.format(db))
-        return HTTPException(status_code=404, detail=f"No database {db} found")
+        raise HTTPException(status_code=404, detail=f"No database {db} found")
 
     return (f'/db/{db}/container/{id}')
 
@@ -95,7 +95,7 @@ async def list_containers(db):
 
     except exceptions.CosmosResourceNotFoundError:
         print('No containers found')
-        return HTTPException(status_code=404, detail="No containers found")
+        raise HTTPException(status_code=404, detail="No containers found")
     
     return containers
 
@@ -109,7 +109,7 @@ async def get_container(db,id):
         return container._get_properties()
 
     except exceptions.CosmosResourceNotFoundError:
-        return HTTPException(status_code=404, detail='No container \'{0}\' found in database \'{1}\''.format(id,db))
+        raise HTTPException(status_code=404, detail='No container \'{0}\' found in database \'{1}\''.format(id,db))
 
 async def get_item_by_id(container, id):
     print('Getting item by id \'{0}\''.format(id))
