@@ -1,4 +1,5 @@
 from asyncio.windows_events import NULL
+from logging import exception
 from fastapi import HTTPException
 from pydantic import BaseModel
 import azure.cosmos.cosmos_client as cosmos_client
@@ -37,9 +38,7 @@ async def get_database_path(id):
 
     except exceptions.CosmosResourceNotFoundError:
         print('A database with id \'{0}\' does not exist'.format(id))
-        return  HTTPException(status_code=404, detail=f"No database {id} found")
-        #from https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/database_management.py
-        #Also see: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/document_management.py#L41-L49
+        raise  HTTPException(status_code=404, detail=f"No database {id} found")
 
 async def get_database(id):
     print('Return a database object by id: {0}'.format(id))
@@ -111,8 +110,36 @@ async def get_container(db,id):
     except exceptions.CosmosResourceNotFoundError:
         raise HTTPException(status_code=404, detail='No container \'{0}\' found in database \'{1}\''.format(id,db))
 
-async def get_item_by_id(container, id):
+#GET: /db/{db}/container/{container_name}/item/{item_number}
+async def get_item_by_id(db, container_id, id):
     print('Getting item by id \'{0}\''.format(id))
-    #https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/document_management.py#L46-L54
-    #or https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/cosmos/azure-cosmos/samples/document_management.py#L71-L83
-    response = container.read_item(item=id, partition_key=id)
+    try:
+        container_client = dbclient.get_database_client(db)
+        container = container_client.get_container_client(container_id)
+        item = container.read_item(item=id, partition_key=id)
+        print('Retrieved item by id \'{0}\'. Its name is: \'{1}\''.format(id, item['name']))
+        return item
+    except exceptions.CosmosResourceNotFoundError:
+        raise HTTPException(status_code=404, detail='No item found \'{0}\' in container \'{1}\' in database \'{2}\''.format(id, container_id, db))
+
+#GET: /db/{db}/container/{container_name}/items?column_name=name&column_value=value
+async def get_item_by_column(db, container_id, column_name, column_value):
+    print(f'Getting item where {column_name} is {column_value}')
+    try:
+        container_client = dbclient.get_database_client(db)
+        container = container_client.get_container_client(container_id)
+        items = list(container.query_items(
+            query = f'SELECT * FROM r WHERE r.{column_name} = @column_value',
+            parameters=[
+            {"name":"@column_value", "value": column_value}
+            ],enable_cross_partition_query=True
+        ))
+        if len(items) != 0:
+            return items
+        else:
+            raise HTTPException(status_code=404, detail='No item found in container \'{0}\' matching conditions.'.format(container_id))
+
+    except:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server error when querying container \'{0}\' matching conditions.'.format(container_id))
+        

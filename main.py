@@ -60,3 +60,16 @@ async def get_containers(db):
 async def get_container(db,id):
     c_data = await DB.get_container(db,id)
     return c_data
+
+@app.get("/db/{db}/container/{container_id}/item/{item_id}")
+async def get_item(db,container_id,item_id):
+    item = await DB.get_item_by_id(db,container_id,item_id)
+    return item
+
+#Uses query params 
+#Strings added that aren't part of the path are treated as query parameters
+#See: https://fastapi.tiangolo.com/tutorial/query-params/
+@app.get("/db/{db}/container/{container_id}/items")
+async def get_item_by_column(db,container_id,column_name: str = 'name', column_value: str = None):
+    items = await DB.get_item_by_column(db,container_id,column_name,column_value)
+    return items
